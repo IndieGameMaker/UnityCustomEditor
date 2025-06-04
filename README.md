@@ -27,7 +27,7 @@
 | RectField                       | Rect 영역 입력                          |
 | BoundsField                     | Bounds 영역 입력                        |
 | Foldout                         | 접이식 섹션 UI                          |
-| Space                           | 여백 공간 삽입                          |
+| Space                           | 여백 삽입                               |
 | HelpBox                         | 설명이나 경고 메시지 박스               |
 | Button                          | 버튼 생성 및 클릭 이벤트 처리           |
 | HorizontalScope / VerticalScope | UI 배치 정렬 용도                       |
