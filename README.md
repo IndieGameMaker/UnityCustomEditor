@@ -2,7 +2,7 @@
 
 ## 사용 에셋
 
-
+[사용에셋 다운로드](assets/UnityRoyal.unitypackage)
 
 ## 커스텀 에디터 제작에 사용되는 클래스
 
