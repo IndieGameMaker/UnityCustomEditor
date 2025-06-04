@@ -228,6 +228,11 @@ public class ItemCreator : EditorWindow
             item.quantity = quantity;
             item.isMultiple = isMultiple;
             
+            // AssetDatabase 란?
+            // Unity 에디터에서 에셋을 생성하고 관리하는 API입니다.
+            // CreateAsset 메소드를 사용하여 스크립터블 오브젝트를 에셋으로 저장합니다.
+            // SaveAssets 메소드를 사용하여 변경 사항을 저장합니다.
+            // 이 코드는 Unity 에디터에서만 작동합니다.
             AssetDatabase.CreateAsset(item, $"Assets/{itemName}.asset");
             AssetDatabase.SaveAssets();
         }
