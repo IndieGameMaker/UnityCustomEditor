@@ -87,3 +87,150 @@ public class PlayerStatsEditor : Editor
     }
 }
 ```
+
+## GameManager.cs
+
+```csharp
+using System.Collections;
+using UnityEngine;
+
+public class GameManager : MonoBehaviour
+{
+    [SerializeField] private GameObject enemyPrefab;
+    public Transform player;
+
+    private void Start()
+    {
+        // 랜덤 시드 초기화
+        Random.InitState(System.DateTime.Now.Millisecond);
+        
+        player = GameObject.FindGameObjectWithTag("Player").transform;
+        SpawnEnemy();
+    }
+
+    public void SpawnEnemy()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            
+            Vector2 pos2 = Random.insideUnitCircle.normalized * Random.Range(10.0f, 20.0f);
+            Vector3 pos = new Vector3(pos2.x, 0, pos2.y);
+
+            if (Application.isPlaying)
+            {
+                Quaternion rot = Quaternion.LookRotation(player.position - pos);
+                var enemy = Instantiate(enemyPrefab, pos, rot);
+            }
+            else
+            {
+                var playerTr = GameObject.FindGameObjectWithTag("Player").transform;
+                Quaternion rot = Quaternion.LookRotation(playerTr.position - pos);
+                
+                var enemy = Instantiate(enemyPrefab, pos, rot);
+            }
+        }
+    }
+}
+
+```
+
+### GameManagerEditor.cs
+
+```csharp
+using UnityEditor;
+using UnityEngine;
+
+[CustomEditor(typeof(GameManager))]
+public class GameManagerEditor : Editor
+{
+    public override void OnInspectorGUI()
+    {
+        GameManager manager = (GameManager)target;
+        
+        EditorGUILayout.ObjectField("주인공", manager.player, typeof(Transform), true);
+
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("적 생성"))
+        {
+            manager.SpawnEnemy();
+        }
+        
+        if (GUILayout.Button("적 제거"))
+        {
+            var enemies = GameObject.FindGameObjectsWithTag("Enemy");
+            foreach (var enemy in enemies)
+            {
+                DestroyImmediate(enemy);
+            }        
+        }
+        EditorGUILayout.EndHorizontal();
+    }
+}
+
+```
+
+---
+
+### Item 생성 , 스크립터블오브젝트 생성
+
+#### ItemData.cs
+
+```csharp
+using UnityEngine;
+
+// CharacterData 컴포넌트는 캐릭터의 데이터를 저장하는 용도로 사용됩니다.
+public enum ItemType
+{
+    Weapon,
+    Armor,
+    Consumable,
+    QuestItem
+}
+
+public class ItemData : ScriptableObject
+{
+    public string itemName; // 아이템 이름
+    public ItemType type; // 아이템 종류
+    public int quantity; // 아이템의 개수
+    public bool isMultiple; // 아이템이 여러 개일 수 있는지 여부
+}
+```
+
+```csharp
+using UnityEditor;
+using UnityEngine;
+
+public class ItemCreator : EditorWindow
+{
+    private string itemName = "New Item";
+    private int quantity = 1;
+    private bool isMultiple = false;
+    private ItemType itemType = ItemType.Weapon;
+
+    [MenuItem("Tools/Item Creator")]
+    private static void Init()
+    {
+        GetWindow<ItemCreator>("Item Creator");
+    }
+
+    private void OnGUI()
+    {
+        itemName = EditorGUILayout.TextField("아이템 명", itemName);
+        itemType = (ItemType)EditorGUILayout.EnumPopup("아이템 종류", itemType);
+        quantity = EditorGUILayout.IntField("보유 수량", quantity);
+        isMultiple = EditorGUILayout.Toggle("복수 보유 가능", isMultiple);
+
+        if (GUILayout.Button("아이템 생성"))
+        {
+            ItemData item = ScriptableObject.CreateInstance<ItemData>();
+            item.itemName = itemName;
+            item.type = itemType;
+            item.quantity = quantity;
+            item.isMultiple = isMultiple;
+            
+            AssetDatabase.CreateAsset(item, $"Assets/{itemName}.asset");
+            AssetDatabase.SaveAssets();
+        }
+    }
+}
+```
