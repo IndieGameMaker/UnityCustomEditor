@@ -239,3 +239,66 @@ public class ItemCreator : EditorWindow
     }
 }
 ```
+
+### GitBranch
+
+```csharp
+using UnityEditor;
+using UnityEngine;
+using System.IO;
+
+[InitializeOnLoad]
+public static class GitBranchLabel
+{
+    static string branchName = "unknown";
+
+    static GitBranchLabel()
+    {
+        UpdateBranchName();
+        SceneView.duringSceneGui += OnSceneGUI;
+    }
+
+    static void UpdateBranchName()
+    {
+        try
+        {
+            string gitHeadPath = Path.Combine(Directory.GetCurrentDirectory(), ".git", "HEAD");
+            if (File.Exists(gitHeadPath))
+            {
+                string headContent = File.ReadAllText(gitHeadPath).Trim();
+                if (headContent.StartsWith("ref:"))
+                {
+                    branchName = headContent.Split('/')[^1]; // 가장 마지막 부분 (브랜치명)
+                }
+                else
+                {
+                    branchName = "detached HEAD";
+                }
+            }
+            else
+            {
+                branchName = "no .git";
+            }
+        }
+        catch
+        {
+            branchName = "error";
+        }
+    }
+
+    static void OnSceneGUI(SceneView sceneView)
+    {
+        Handles.BeginGUI();
+
+        GUIStyle style = new GUIStyle(EditorStyles.label);
+        style.fontSize = 14;
+        style.normal.textColor = Color.white;
+        style.fontStyle = FontStyle.Bold;
+
+        Rect rect = new Rect(50, 10, 300, 25);
+        GUI.Label(rect, $"Git Branch: {branchName}", style);
+
+        Handles.EndGUI();
+    }
+}
+```
